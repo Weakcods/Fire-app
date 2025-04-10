@@ -1,12 +1,46 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load fire_extras %}
 
 {% block content %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+  .filter-control {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    margin-bottom: 15px;
+  }
+  .filter-control select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+  }
+  .city-stats {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    margin-bottom: 15px;
+  }
+  .stat-card {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    color: white;
+  }
+  .stat-minor { background-color: #59d05d; }
+  .stat-moderate { background-color: #fdaf4b; }
+  .stat-major { background-color: #f3545d; }
+  .stat-total { background-color: #1d7af3; }
+</style>
 
 <div class="page-inner">
   <div class="page-header">
-    <h4 class="page-title">Dashboard</h4>
+    <h4 class="page-title">Fire Incidents Map</h4>
     <ul class="breadcrumbs">
       <li class="nav-home">
         <a href="#">
@@ -28,19 +62,54 @@
     </ul>
   </div>
   <div class="row">
-    <div class="col-md-12">
-      <div class="card card-transparent">
+    <div class="col-md-3">
+      <div class="filter-control">
+        <h4>Filter by City</h4>
+        <form id="cityFilterForm" method="get">
+          <select name="city" id="cityFilter" onchange="this.form.submit()" class="form-control">
+            <option value="">All Cities</option>
+            {% for city in cities %}
+              <option value="{{ city }}" {% if city == selected_city %}selected{% endif %}>
+                {{ city }}
+              </option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+
+      {% if selected_city %}
+        <div class="city-stats">
+          <h4>{{ selected_city }} Statistics</h4>
+          <div class="stat-card stat-total">
+            <strong>Total Incidents:</strong> {{ city_stats|get_item:selected_city|get_item:'total' }}
+          </div>
+          <div class="stat-card stat-minor">
+            <strong>Minor:</strong> {{ city_stats|get_item:selected_city|get_item:'minor' }}
+          </div>
+          <div class="stat-card stat-moderate">
+            <strong>Moderate:</strong> {{ city_stats|get_item:selected_city|get_item:'moderate' }}
+          </div>
+          <div class="stat-card stat-major">
+            <strong>Major:</strong> {{ city_stats|get_item:selected_city|get_item:'major' }}
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="legend-control">
+        <h4>Severity Levels</h4>
+        <div class="stat-card stat-minor">Minor Fire</div>
+        <div class="stat-card stat-moderate">Moderate Fire</div>
+        <div class="stat-card stat-major">Major Fire</div>
+      </div>
+    </div>
+
+    <div class="col-md-9">
+      <div class="card">
         <div class="card-header">
-          <h4 class="card-title text-center">Fire Incidents Map</h4>
-          <p class="card-category text-center">
-            Shows all fire incidents. Data from OpenStreetMap
-            <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>.
-          </p>
+          <h4 class="card-title">{% if selected_city %}{{ selected_city }}{% else %}All Cities{% endif %} - Fire Incidents</h4>
         </div>
         <div class="card-body">
-          <div class="col-md-10 ml-auto mr-auto">
-            <div id="map" style="width: 100%; height: 400px"></div>
-          </div>
+          <div id="map" style="width: 100%; height: 600px"></div>
         </div>
       </div>
     </div>
@@ -49,8 +118,8 @@
 
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
-  var map = L.map('map').setView([9.81644, 118.72239], 13);
-
+  var map = L.map('map');
+  
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
@@ -60,13 +129,14 @@
 
   // Define colors for different severity levels
   var severityColors = {
-    'Minor': '#59d05d',    // Green
-    'Moderate': '#fdaf4b',  // Yellow
-    'Major': '#f3545d'     // Red
+    'Minor Fire': '#59d05d',    // Green
+    'Moderate Fire': '#fdaf4b',  // Yellow
+    'Major Fire': '#f3545d'     // Red
   };
 
   // Create an array to hold all the markers
   var markers = [];
+  var bounds = L.latLngBounds();
 
   // Loop through the incidents data and create markers
   incidents.forEach(function(incident) {
@@ -83,10 +153,17 @@
       fillOpacity: 0.8
     }).addTo(map);
 
-    // Create popup content
+    // Create popup content with more detailed information
     var popupContent = `
-      <strong>Severity:</strong> ${incident.severity_level}<br>
-      <strong>Date:</strong> ${incident.date_time}
+      <div style="min-width: 200px;">
+        <h6 style="margin-bottom: 5px; color: ${severityColors[incident.severity_level]};">
+          ${incident.severity_level}
+        </h6>
+        <strong>Date:</strong> ${incident.date_time}<br>
+        <strong>City:</strong> ${incident.city}<br>
+        <strong>Address:</strong> ${incident.address}<br>
+        <strong>Description:</strong> ${incident.description}
+      </div>
     `;
     
     marker.bindPopup(popupContent);
@@ -101,24 +178,15 @@
     });
 
     markers.push(marker);
+    bounds.extend([latitude, longitude]);
   });
 
-  // Create a legend
-  var legend = L.control({position: 'bottomright'});
-  legend.onAdd = function(map) {
-    var div = L.DomUtil.create('div', 'info legend');
-    div.style.backgroundColor = 'white';
-    div.style.padding = '10px';
-    div.style.borderRadius = '5px';
-    div.innerHTML += '<h4>Severity Levels</h4>';
-    
-    for (var severity in severityColors) {
-      div.innerHTML += 
-        '<i style="background: ' + severityColors[severity] + '; width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7;"></i> ' +
-        severity + '<br>';
-    }
-    return div;
-  };
-  legend.addTo(map);
+  // Fit the map to show all markers if there are any
+  if (markers.length > 0) {
+    map.fitBounds(bounds);
+  } else {
+    // Default view if no incidents
+    map.setView([9.81644, 118.72239], 13);
+  }
 </script>
 {% endblock %}

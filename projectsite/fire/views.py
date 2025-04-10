@@ -1,11 +1,10 @@
 from django.shortcuts import render
 from django.views.generic.list import ListView
-from fire.models import Locations, Incident, FireStation
-from django.db import connection
+from django.db import connection, models
 from django.http import JsonResponse
 from django.db.models.functions import ExtractMonth
-
-from django.db.models import Count
+from django.db.models import Count, Q
+from fire.models import Locations, Incident, FireStation
 from datetime import datetime
 
 
@@ -187,22 +186,61 @@ def map_station(request):
      return render(request, 'map_station.html', context)
 
 def map_incidents(request):
-    incidents = Incident.objects.select_related('location').values(
+    # Get the selected city from the query parameters
+    selected_city = request.GET.get('city', '')
+    
+    # Get all cities that have incidents
+    cities = Incident.objects.select_related('location').values_list(
+        'location__city', flat=True
+    ).distinct().order_by('location__city')
+    
+    # Base query
+    incidents_query = Incident.objects.select_related('location')
+    
+    # Apply city filter if selected
+    if selected_city:
+        incidents_query = incidents_query.filter(location__city=selected_city)
+    
+    # Get the incidents data with all necessary information
+    incidents = incidents_query.values(
         'location__latitude', 
         'location__longitude',
         'severity_level',
-        'date_time'
-    )
+        'date_time',
+        'location__city',
+        'location__address',
+        'description'
+    ).order_by('-date_time')  # Most recent incidents first
 
-    incidents_list = list(incidents)
-    for incident in incidents_list:
-        incident['latitude'] = float(incident['location__latitude'])
-        incident['longitude'] = float(incident['location__longitude'])
-        # Convert date_time to string for JSON serialization
-        incident['date_time'] = incident['date_time'].strftime('%Y-%m-%d %H:%M:%S')
+    # Process the incidents data
+    incidents_list = []
+    for incident in incidents:
+        incidents_list.append({
+            'latitude': float(incident['location__latitude']),
+            'longitude': float(incident['location__longitude']),
+            'severity_level': incident['severity_level'],
+            'date_time': incident['date_time'].strftime('%Y-%m-%d %H:%M:%S'),
+            'city': incident['location__city'],
+            'address': incident['location__address'],
+            'description': incident['description']
+        })
+
+    # Get statistics for each city
+    city_stats = {}
+    for city in cities:
+        stats = Incident.objects.filter(location__city=city).aggregate(
+            total=models.Count('id'),
+            minor=models.Count('id', filter=Q(severity_level='Minor Fire')),
+            moderate=models.Count('id', filter=Q(severity_level='Moderate Fire')),
+            major=models.Count('id', filter=Q(severity_level='Major Fire'))
+        )
+        city_stats[city] = stats
 
     context = {
         'incidents': incidents_list,
+        'cities': cities,
+        'selected_city': selected_city,
+        'city_stats': city_stats,
     }
 
     return render(request, 'map_incidents.html', context)
