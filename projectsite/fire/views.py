@@ -171,19 +171,39 @@ def multipleBarbySeverity(request):
     return JsonResponse(result)
 
 def map_station(request):
-     fireStations = FireStation.objects.values('name', 'latitude', 'longitude')
+    # Define the static fire station data
+    fire_stations = [
+        {
+            'name': 'Sta. Lourdes Fire Station',
+            'latitude': 9.83369118406607,
+            'longitude': 118.72275445554,
+            'address': 'Near Sta. Lourdes National High School',
+            'phone': '(048) 434-7701',
+            'coverage': 'Sta. Lourdes Area'
+        },
+        {
+            'name': 'Tagburos Fire Station',
+            'latitude': 9.82084079557777,
+            'longitude': 118.74401369655,
+            'address': 'Near Tagburos Elementary School',
+            'phone': '(048) 434-7702',
+            'coverage': 'Tagburos Area'
+        },
+        {
+            'name': 'Sicsican Fire Station',
+            'latitude': 9.79555573875096,
+            'longitude': 118.710565836493,
+            'address': 'Near Sicsican Elementary',
+            'phone': '(048) 434-7703',
+            'coverage': 'Sicsican Area'
+        }
+    ]
 
-     for fs in fireStations:
-         fs['latitude'] = float(fs['latitude'])
-         fs['longitude'] = float(fs['longitude'])
+    context = {
+        'stations': fire_stations,
+    }
 
-     fireStations_list = list(fireStations)
-
-     context = {
-         'fireStations': fireStations_list,
-     }
-
-     return render(request, 'map_station.html', context)
+    return render(request, 'map_station.html', context)
 
 def map_incidents(request):
     # Get the selected city from the query parameters
