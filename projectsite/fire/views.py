@@ -185,3 +185,24 @@ def map_station(request):
      }
 
      return render(request, 'map_station.html', context)
+
+def map_incidents(request):
+    incidents = Incident.objects.select_related('location').values(
+        'location__latitude', 
+        'location__longitude',
+        'severity_level',
+        'date_time'
+    )
+
+    incidents_list = list(incidents)
+    for incident in incidents_list:
+        incident['latitude'] = float(incident['location__latitude'])
+        incident['longitude'] = float(incident['location__longitude'])
+        # Convert date_time to string for JSON serialization
+        incident['date_time'] = incident['date_time'].strftime('%Y-%m-%d %H:%M:%S')
+
+    context = {
+        'incidents': incidents_list,
+    }
+
+    return render(request, 'map_incidents.html', context)

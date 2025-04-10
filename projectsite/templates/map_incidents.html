@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<div class="page-inner">
+  <div class="page-header">
+    <h4 class="page-title">Dashboard</h4>
+    <ul class="breadcrumbs">
+      <li class="nav-home">
+        <a href="#">
+          <i class="flaticon-home"></i>
+        </a>
+      </li>
+      <li class="separator">
+        <i class="flaticon-right-arrow"></i>
+      </li>
+      <li class="nav-item">
+        <a href="#">Maps</a>
+      </li>
+      <li class="separator">
+        <i class="flaticon-right-arrow"></i>
+      </li>
+      <li class="nav-item">
+        <a href="#">Fire Incidents</a>
+      </li>
+    </ul>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card card-transparent">
+        <div class="card-header">
+          <h4 class="card-title text-center">Fire Incidents Map</h4>
+          <p class="card-category text-center">
+            Shows all fire incidents. Data from OpenStreetMap
+            <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>.
+          </p>
+        </div>
+        <div class="card-body">
+          <div class="col-md-10 ml-auto mr-auto">
+            <div id="map" style="width: 100%; height: 400px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+  var map = L.map('map').setView([9.81644, 118.72239], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  // Get the incidents data
+  var incidents = {{ incidents|safe }};
+
+  // Define colors for different severity levels
+  var severityColors = {
+    'Minor': '#59d05d',    // Green
+    'Moderate': '#fdaf4b',  // Yellow
+    'Major': '#f3545d'     // Red
+  };
+
+  // Create an array to hold all the markers
+  var markers = [];
+
+  // Loop through the incidents data and create markers
+  incidents.forEach(function(incident) {
+    var latitude = incident.latitude;
+    var longitude = incident.longitude;
+    
+    // Create a circle marker with color based on severity
+    var marker = L.circleMarker([latitude, longitude], {
+      radius: 8,
+      fillColor: severityColors[incident.severity_level],
+      color: '#fff',
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.8
+    }).addTo(map);
+
+    // Create popup content
+    var popupContent = `
+      <strong>Severity:</strong> ${incident.severity_level}<br>
+      <strong>Date:</strong> ${incident.date_time}
+    `;
+    
+    marker.bindPopup(popupContent);
+
+    // Bind mouseover and mouseout events
+    marker.on('mouseover', function() {
+      this.openPopup();
+    });
+    
+    marker.on('mouseout', function() {
+      this.closePopup();
+    });
+
+    markers.push(marker);
+  });
+
+  // Create a legend
+  var legend = L.control({position: 'bottomright'});
+  legend.onAdd = function(map) {
+    var div = L.DomUtil.create('div', 'info legend');
+    div.style.backgroundColor = 'white';
+    div.style.padding = '10px';
+    div.style.borderRadius = '5px';
+    div.innerHTML += '<h4>Severity Levels</h4>';
+    
+    for (var severity in severityColors) {
+      div.innerHTML += 
+        '<i style="background: ' + severityColors[severity] + '; width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7;"></i> ' +
+        severity + '<br>';
+    }
+    return div;
+  };
+  legend.addTo(map);
+</script>
+{% endblock %}
