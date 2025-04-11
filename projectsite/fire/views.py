@@ -171,7 +171,7 @@ def multipleBarbySeverity(request):
     return JsonResponse(result)
 
 def map_station(request):
-    # Define the static fire station data
+    # Define the static fire station data with their trucks
     fire_stations = [
         {
             'name': 'Sta. Lourdes Fire Station',
@@ -179,7 +179,19 @@ def map_station(request):
             'longitude': 118.72275445554,
             'address': 'Near Sta. Lourdes National High School',
             'phone': '(048) 434-7701',
-            'coverage': 'Sta. Lourdes Area'
+            'coverage': 'Sta. Lourdes Area',
+            'trucks': [
+                {
+                    'truck_number': 'SL-01',
+                    'model': 'Rosenbauer Pumper Truck',
+                    'capacity': '4000L'
+                },
+                {
+                    'truck_number': 'SL-02',
+                    'model': 'Pierce Ladder Truck',
+                    'capacity': '3000L'
+                }
+            ]
         },
         {
             'name': 'Tagburos Fire Station',
@@ -187,7 +199,14 @@ def map_station(request):
             'longitude': 118.74401369655,
             'address': 'Near Tagburos Elementary School',
             'phone': '(048) 434-7702',
-            'coverage': 'Tagburos Area'
+            'coverage': 'Tagburos Area',
+            'trucks': [
+                {
+                    'truck_number': 'TG-01',
+                    'model': 'E-One Pumper Truck',
+                    'capacity': '3500L'
+                }
+            ]
         },
         {
             'name': 'Sicsican Fire Station',
@@ -195,7 +214,19 @@ def map_station(request):
             'longitude': 118.710565836493,
             'address': 'Near Sicsican Elementary',
             'phone': '(048) 434-7703',
-            'coverage': 'Sicsican Area'
+            'coverage': 'Sicsican Area',
+            'trucks': [
+                {
+                    'truck_number': 'SC-01',
+                    'model': 'Spartan Fire Engine',
+                    'capacity': '5000L'
+                },
+                {
+                    'truck_number': 'SC-02',
+                    'model': 'Pierce Tanker Truck',
+                    'capacity': '6000L'
+                }
+            ]
         }
     ]
 
