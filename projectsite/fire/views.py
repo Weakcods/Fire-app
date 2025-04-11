@@ -237,13 +237,28 @@ def map_station(request):
     return render(request, 'map_station.html', context)
 
 def map_incidents(request):
+    # Define Philippine cities (you can add more as needed)
+    PHILIPPINE_CITIES = [
+        'Puerto Princesa',
+        'Manila',
+        'Quezon City',
+        'Davao City',
+        'Cebu City',
+        'Makati',
+        'Taguig',
+        'Pasig',
+        'Mandaluyong',
+        'Baguio'
+    ]
+    
     # Get the selected city from the query parameters
     selected_city = request.GET.get('city', '')
     
     # Get all cities that have incidents
-    cities = Incident.objects.select_related('location').values_list(
-        'location__city', flat=True
-    ).distinct().order_by('location__city')
+    db_cities = set(Locations.objects.values_list('city', flat=True).distinct())
+    
+    # Combine database cities with predefined Philippine cities
+    all_cities = sorted(set(PHILIPPINE_CITIES) | db_cities)
     
     # Base query
     incidents_query = Incident.objects.select_related('location')
@@ -276,22 +291,10 @@ def map_incidents(request):
             'description': incident['description']
         })
 
-    # Get statistics for each city
-    city_stats = {}
-    for city in cities:
-        stats = Incident.objects.filter(location__city=city).aggregate(
-            total=models.Count('id'),
-            minor=models.Count('id', filter=Q(severity_level='Minor Fire')),
-            moderate=models.Count('id', filter=Q(severity_level='Moderate Fire')),
-            major=models.Count('id', filter=Q(severity_level='Major Fire'))
-        )
-        city_stats[city] = stats
-
     context = {
         'incidents': incidents_list,
-        'cities': cities,
+        'cities': all_cities,
         'selected_city': selected_city,
-        'city_stats': city_stats,
     }
 
     return render(request, 'map_incidents.html', context)

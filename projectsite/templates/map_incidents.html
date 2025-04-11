@@ -19,7 +19,7 @@
     border: 1px solid #ddd;
     margin-bottom: 10px;
   }
-  .city-stats {
+  .legend-control {
     background-color: white;
     padding: 15px;
     border-radius: 5px;
@@ -35,7 +35,6 @@
   .stat-minor { background-color: #59d05d; }
   .stat-moderate { background-color: #fdaf4b; }
   .stat-major { background-color: #f3545d; }
-  .stat-total { background-color: #1d7af3; }
 </style>
 
 <div class="page-inner">
@@ -77,24 +76,6 @@
         </form>
       </div>
 
-      {% if selected_city %}
-        <div class="city-stats">
-          <h4>{{ selected_city }} Statistics</h4>
-          <div class="stat-card stat-total">
-            <strong>Total Incidents:</strong> {{ city_stats|get_item:selected_city|get_item:'total' }}
-          </div>
-          <div class="stat-card stat-minor">
-            <strong>Minor:</strong> {{ city_stats|get_item:selected_city|get_item:'minor' }}
-          </div>
-          <div class="stat-card stat-moderate">
-            <strong>Moderate:</strong> {{ city_stats|get_item:selected_city|get_item:'moderate' }}
-          </div>
-          <div class="stat-card stat-major">
-            <strong>Major:</strong> {{ city_stats|get_item:selected_city|get_item:'major' }}
-          </div>
-        </div>
-      {% endif %}
-
       <div class="legend-control">
         <h4>Severity Levels</h4>
         <div class="stat-card stat-minor">Minor Fire</div>
@@ -124,6 +105,13 @@
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
 
+  // Philippines centered view coordinates
+  var defaultView = {
+    lat: 12.8797,  // Philippines center latitude
+    lng: 121.7740, // Philippines center longitude
+    zoom: 6        // Zoom level to show most of Philippines
+  };
+
   // Get the incidents data
   var incidents = {{ incidents|safe }};
 
@@ -134,9 +122,12 @@
     'Major Fire': '#f3545d'     // Red
   };
 
-  // Create an array to hold all the markers
-  var markers = [];
-  var bounds = L.latLngBounds();
+  // Create city layer groups to handle filtering
+  var cityLayers = {};
+
+  // Create bounds for the selected city's markers
+  var selectedCityBounds = L.latLngBounds();
+  var hasMarkers = false;
 
   // Loop through the incidents data and create markers
   incidents.forEach(function(incident) {
@@ -151,7 +142,7 @@
       weight: 1,
       opacity: 1,
       fillOpacity: 0.8
-    }).addTo(map);
+    });
 
     // Create popup content with more detailed information
     var popupContent = `
@@ -171,22 +162,65 @@
     // Bind mouseover and mouseout events
     marker.on('mouseover', function() {
       this.openPopup();
+      this.setStyle({
+        radius: 12,
+        fillOpacity: 1
+      });
     });
     
     marker.on('mouseout', function() {
       this.closePopup();
+      this.setStyle({
+        radius: 8,
+        fillOpacity: 0.8
+      });
     });
 
-    markers.push(marker);
-    bounds.extend([latitude, longitude]);
+    // Add marker to the appropriate city layer group
+    if (!cityLayers[incident.city]) {
+      cityLayers[incident.city] = L.layerGroup().addTo(map);
+    }
+    marker.addTo(cityLayers[incident.city]);
+    
+    // If this marker belongs to the selected city, extend the bounds
+    if (!selectedCity || incident.city === selectedCity) {
+      selectedCityBounds.extend([latitude, longitude]);
+      hasMarkers = true;
+    }
   });
 
-  // Fit the map to show all markers if there are any
-  if (markers.length > 0) {
-    map.fitBounds(bounds);
+  // Get the selected city from the filter
+  var selectedCity = '{{ selected_city }}';
+
+  // Set the map view based on markers or default to Philippines view
+  if (hasMarkers) {
+    map.fitBounds(selectedCityBounds, {
+      padding: [50, 50],
+      maxZoom: 13
+    });
   } else {
-    // Default view if no incidents
-    map.setView([9.81644, 118.72239], 13);
+    // If no markers or no city selected, show full Philippines view
+    map.setView([defaultView.lat, defaultView.lng], defaultView.zoom);
+  }
+
+  // Philippine city coordinates for cities without incidents
+  var philippineCities = {
+    'Manila': [14.5995, 120.9842],
+    'Quezon City': [14.6760, 121.0437],
+    'Davao City': [7.1907, 125.4553],
+    'Cebu City': [10.3157, 123.8854],
+    'Makati': [14.5547, 121.0244],
+    'Taguig': [14.5176, 121.0509],
+    'Pasig': [14.5764, 121.0851],
+    'Mandaluyong': [14.5794, 121.0359],
+    'Baguio': [16.4023, 120.5960],
+    'Puerto Princesa': [9.9672, 118.7855]
+  };
+
+  // If a city is selected but has no incidents, center on its known coordinates
+  if (selectedCity && !hasMarkers && philippineCities[selectedCity]) {
+    var cityCoords = philippineCities[selectedCity];
+    map.setView(cityCoords, 13);
   }
 </script>
 {% endblock %}
