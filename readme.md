@@ -7,7 +7,94 @@ A simple app that monitors fire incidents from different cities and countries.
 1. Create a Repository on GitHub:
 
 - Log in to your GitHub account.
-- Click on the "+" icon in the top-right corner of the page and select "New repository."
+- Click on the "+" icon in the top-right corner of the page and select "New reposi# FireApp - Fire Incident Monitoring System
+
+A web-based application that monitors and visualizes fire incidents across different cities and countries. Live demo available at: [joshuawa.pythonanywhere.com](https://joshuawa.pythonanywhere.com)
+
+## Features
+
+- 🗺️ Interactive Maps
+  - Fire station locations with detailed information
+  - Real-time incident mapping
+  - Fire truck deployment visualization
+
+- 📊 Analytics Dashboard
+  - Incident severity distribution
+  - Monthly incident trends
+  - Geographic distribution analysis
+  - Multi-dimensional data visualization
+
+- 🚒 Fire Station Management
+  - Complete fire station directory
+  - Fire truck inventory tracking
+  - Emergency contact information
+
+## Tech Stack
+
+- Backend: Django 4.2
+- Frontend: HTML5, CSS3, JavaScript
+- Maps: Leaflet.js
+- Charts: Chart.js
+- Database: SQLite3
+- Deployment: PythonAnywhere
+
+## Local Development Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Weakcods/Fire-app.git
+cd Fire-app
+```
+
+2. Create and activate virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+4. Set up the database:
+```bash
+python manage.py migrate
+```
+
+5. Create superuser:
+```bash
+python manage.py createsuperuser
+```
+
+6. Run development server:
+```bash
+python manage.py runserver
+```
+
+Visit `http://127.0.0.1:8000` to access the application.
+
+## Deployment
+
+The application is deployed on PythonAnywhere:
+- Live URL: [joshuawa.pythonanywhere.com](https://joshuawa.pythonanywhere.com)
+- Admin Interface: [joshuawa.pythonanywhere.com/admin](https://joshuawa.pythonanywhere.com/admin)
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+Project Link: [github.com/Weakcods/Fire-app](https://github.com/Weakcods/Fire-app)tory."
 - Enter a name for your repository, choose any other settings you want, and click "Create repository."
 
 2. Clone the Repository Locally:
