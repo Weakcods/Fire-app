@@ -4,7 +4,7 @@ from django.db import connection, models
 from django.http import JsonResponse
 from django.db.models.functions import ExtractMonth
 from django.db.models import Count, Q
-from fire.models import Locations, Incident, FireStation
+from fire.models import Locations, Incident, FireStation, FireTruck
 from datetime import datetime
 
 
@@ -171,67 +171,36 @@ def multipleBarbySeverity(request):
     return JsonResponse(result)
 
 def map_station(request):
-    # Define the static fire station data with their trucks
-    fire_stations = [
-        {
-            'name': 'Sta. Lourdes Fire Station',
-            'latitude': 9.83369118406607,
-            'longitude': 118.72275445554,
-            'address': 'Near Sta. Lourdes National High School',
-            'phone': '(048) 434-7701',
-            'coverage': 'Sta. Lourdes Area',
-            'trucks': [
-                {
-                    'truck_number': 'SL-01',
-                    'model': 'Rosenbauer Pumper Truck',
-                    'capacity': '4000L'
-                },
-                {
-                    'truck_number': 'SL-02',
-                    'model': 'Pierce Ladder Truck',
-                    'capacity': '3000L'
-                }
-            ]
-        },
-        {
-            'name': 'Tagburos Fire Station',
-            'latitude': 9.82084079557777,
-            'longitude': 118.74401369655,
-            'address': 'Near Tagburos Elementary School',
-            'phone': '(048) 434-7702',
-            'coverage': 'Tagburos Area',
-            'trucks': [
-                {
-                    'truck_number': 'TG-01',
-                    'model': 'E-One Pumper Truck',
-                    'capacity': '3500L'
-                }
-            ]
-        },
-        {
-            'name': 'Sicsican Fire Station',
-            'latitude': 9.79555573875096,
-            'longitude': 118.710565836493,
-            'address': 'Near Sicsican Elementary',
-            'phone': '(048) 434-7703',
-            'coverage': 'Sicsican Area',
-            'trucks': [
-                {
-                    'truck_number': 'SC-01',
-                    'model': 'Spartan Fire Engine',
-                    'capacity': '5000L'
-                },
-                {
-                    'truck_number': 'SC-02',
-                    'model': 'Pierce Tanker Truck',
-                    'capacity': '6000L'
-                }
-            ]
+    # Get all fire stations from the database
+    fire_stations = FireStation.objects.all()
+    
+    # Prepare the stations data with their associated trucks
+    stations_data = []
+    for station in fire_stations:
+        # Get all trucks associated with this station
+        trucks = FireTruck.objects.filter(station=station)
+        
+        # Format truck data
+        truck_data = [{
+            'truck_number': truck.truck_number,
+            'model': truck.model,
+            'capacity': truck.capacity
+        } for truck in trucks]
+        
+        # Create station dictionary with all required data
+        station_data = {
+            'name': station.name,
+            'latitude': float(station.latitude) if station.latitude else 0,
+            'longitude': float(station.longitude) if station.longitude else 0,
+            'address': station.address,
+            'phone': '(048) 434-7701',  # You might want to add a phone field to your FireStation model
+            'coverage': f'{station.city} Area',  # Using city as coverage area
+            'trucks': truck_data
         }
-    ]
+        stations_data.append(station_data)
 
     context = {
-        'stations': fire_stations,
+        'stations': stations_data,
     }
 
     return render(request, 'map_station.html', context)
