@@ -63,24 +63,40 @@
   <div class="row">
     <div class="col-md-3">
       <div class="filter-control">
-        <h4>Filter by City</h4>
-        <form id="cityFilterForm" method="get">
-          <select name="city" id="cityFilter" onchange="this.form.submit()" class="form-control">
-            <option value="">All Cities</option>
-            {% for city in cities %}
-              <option value="{{ city }}" {% if city == selected_city %}selected{% endif %}>
-                {{ city }}
-              </option>
-            {% endfor %}
-          </select>
+        <h4>Filter Incidents</h4>
+        <form id="filterForm" method="get" class="mt-3">
+          <div class="mb-4">
+            <label for="cityFilter" class="form-label fw-bold">Select City</label>
+            <select name="city" id="cityFilter" class="form-control form-select">
+              <option value="">All Cities</option>
+              {% for city in cities %}
+                <option value="{{ city }}" {% if city == selected_city %}selected{% endif %}>
+                  {{ city }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="fas fa-filter mr-2"></i> Apply Filter
+          </button>
         </form>
       </div>
 
       <div class="legend-control">
         <h4>Severity Levels</h4>
-        <div class="stat-card stat-minor">Minor Fire</div>
-        <div class="stat-card stat-moderate">Moderate Fire</div>
-        <div class="stat-card stat-major">Major Fire</div>
+        <div class="stat-card stat-minor">
+          <span class="severity-dot" style="background-color: #59d05d"></span>
+          Minor Fire
+        </div>
+        <div class="stat-card stat-moderate">
+          <span class="severity-dot" style="background-color: #fdaf4b"></span>
+          Moderate Fire
+        </div>
+        <div class="stat-card stat-major">
+          <span class="severity-dot" style="background-color: #f3545d"></span>
+          Major Fire
+        </div>
       </div>
     </div>
 
@@ -222,5 +238,25 @@
     var cityCoords = philippineCities[selectedCity];
     map.setView(cityCoords, 13);
   }
+
+  // Add style for severity dots in legend
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
+    .severity-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .stat-card {
+      display: flex;
+      align-items: center;
+      background-color: white !important;
+      color: #333 !important;
+      border: 1px solid #ddd;
+    }
+  `;
+  document.head.appendChild(styleElement);
 </script>
 {% endblock %}
