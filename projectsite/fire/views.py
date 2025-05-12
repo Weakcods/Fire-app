@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic.list import ListView
 from django.db import connection, models
 from django.http import JsonResponse
@@ -6,15 +6,59 @@ from django.db.models.functions import ExtractMonth
 from django.db.models import Count, Q
 from fire.models import Locations, Incident, FireStation, FireTruck
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+        
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remember_me = request.POST.get('rememberme')
+        
+        if not username or not password:
+            messages.error(request, 'Please enter both username and password')
+            return render(request, 'auth/login.html')
+            
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                
+                # Set session expiry based on remember me checkbox
+                if not remember_me:
+                    request.session.set_expiry(0)  # Session expires when browser closes
+                
+                # Check if there's a next URL in the query parameters
+                next_url = request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
+                return redirect('home')
+            else:
+                messages.error(request, 'Your account is disabled')
+        else:
+            messages.error(request, 'Invalid username or password')
+    
+    return render(request, 'auth/login.html')
 
-class HomePageView(ListView):
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+class HomePageView(LoginRequiredMixin, ListView):
     model = Locations
     context_object_name = 'home'
     template_name = "home.html"
+    login_url = '/login/'
     
-class ChartView(ListView):
+class ChartView(LoginRequiredMixin, ListView):
     template_name = 'chart.html'
+    login_url = '/login/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -170,6 +214,7 @@ def multipleBarbySeverity(request):
 
     return JsonResponse(result)
 
+@login_required(login_url='/login/')
 def map_station(request):
     # Get all fire stations from the database
     fire_stations = FireStation.objects.all()
@@ -205,6 +250,7 @@ def map_station(request):
 
     return render(request, 'map_station.html', context)
 
+@login_required(login_url='/login/')
 def map_incidents(request):
     # Define Philippine cities (you can add more as needed)
     PHILIPPINE_CITIES = [

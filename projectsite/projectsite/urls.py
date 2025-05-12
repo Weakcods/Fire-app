@@ -1,10 +1,16 @@
 from django.contrib import admin
 from django.urls import path
 
-from fire.views import HomePageView, ChartView, PieCountbySeverity, LineCountbyMonth, MultilineIncidentTop3Country, multipleBarbySeverity, map_station, map_incidents
+from fire.views import (
+    HomePageView, ChartView, PieCountbySeverity, LineCountbyMonth, 
+    MultilineIncidentTop3Country, multipleBarbySeverity, map_station, map_incidents,
+    login_view, logout_view
+)
 from fire import views
 
 urlpatterns = [
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
     path("admin/", admin.site.urls),
     path('', HomePageView.as_view(), name='home'),
     path('dashboard_chart', ChartView.as_view(), name='dashboard-chart'),

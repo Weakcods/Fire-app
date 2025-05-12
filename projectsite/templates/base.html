@@ -27,11 +27,12 @@
     <link rel="stylesheet" href="{% static 'css/demo.css' %}" />
   </head>
   <body>
+    {% if user.is_authenticated %}
     <div class="wrapper">
       <div class="main-header">
         <!-- Logo Header -->
         <div class="logo-header" data-background-color="blue">
-          <a href="index.html" class="logo">
+          <a href="{% url 'home' %}" class="logo">
             <img src="{% static 'img/logo.svg' %}" alt="navbar brand" class="navbar-brand" />
           </a>
           <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,19 +47,35 @@
             </button>
           </div>
         </div>
-        <!-- End Logo Header -->
 
         <!-- Navbar Header -->
         <nav class="navbar navbar-header navbar-expand-lg" data-background-color="blue2">
           <div class="container-fluid">
-            <div class="collapse" id="search-nav">
-              
-            </div>
             <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
-              
-              
-              
-              
+              <li class="nav-item dropdown">
+                <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
+                  <div class="avatar-sm">
+                    <img src="{% static 'img/profile.jpg' %}" alt="..." class="avatar-img rounded-circle">
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-user animated fadeIn">
+                  <div class="dropdown-user-scroll scrollbar-outer">
+                    <li>
+                      <div class="user-box">
+                        <div class="avatar-lg"><img src="{% static 'img/profile.jpg' %}" alt="image profile" class="avatar-img rounded"></div>
+                        <div class="u-text">
+                          <h4>{{ user.username }}</h4>
+                          <p class="text-muted">{{ user.email }}</p>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                  </div>
+                </ul>
+              </li>
             </ul>
           </div>
         </nav>
@@ -76,8 +93,8 @@
               <div class="info">
                 <a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
                   <span>
-                    Hizrian
-                    <span class="user-level">Administrator</span>
+                    {{ user.username }}
+                    <span class="user-level">{% if user.is_superuser %}Administrator{% else %}User{% endif %}</span>
                     <span class="caret"></span>
                   </span>
                 </a>
@@ -88,11 +105,6 @@
                     <li>
                       <a href="#profile">
                         <span class="link-collapse">My Profile</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#edit">
-                        <span class="link-collapse">Edit Profile</span>
                       </a>
                     </li>
                     <li>
@@ -173,22 +185,14 @@
           </div>
         </div>
       </div>
-      <!-- End Sidebar -->
-
-      <div class="main-panel">
+      <!-- End Sidebar -->      <div class="main-panel">
         <div class="content">
-          {% block content %}
-          {% endblock %}
-     
-          </div>
+          {% block dashboard_content %}{% endblock %}
         </div>
         <footer class="footer">
           <div class="container-fluid">
             <nav class="pull-left">
               <ul class="nav">
-                <li class="nav-item">
-                  <a class="nav-link" href="https://www.themekita.com"> ThemeKita </a>
-                </li>
                 <li class="nav-item">
                   <a class="nav-link" href="#"> Help </a>
                 </li>
@@ -197,11 +201,16 @@
                 </li>
               </ul>
             </nav>
-            <div class="copyright ml-auto">2018, made with <i class="fa fa-heart heart text-danger"></i> by <a href="https://www.themekita.com">ThemeKita</a></div>
+            <div class="copyright ml-auto">
+              2025, made with <i class="fa fa-heart heart text-danger"></i> by FireApp
+            </div>
           </div>
         </footer>
       </div>
     </div>
+    {% else %}
+    {% block auth_content %}{% endblock %}
+    {% endif %}
     <!--   Core JS Files   -->
     <script src="{% static 'js/core/jquery.3.2.1.min.js' %}"></script>
     <script src="{% static 'js/core/popper.min.js' %}"></script>

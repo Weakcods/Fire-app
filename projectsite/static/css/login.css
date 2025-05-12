@@ -1,0 +1,108 @@
+.card {
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.card-header {
+    border-radius: 1rem 1rem 0 0 !important;
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+}
+
+.input-group-text {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+}
+
+.btn {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1572E8 0%, #0F4C97 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+    background: linear-gradient(135deg, #1572E8 0%, #0F4C97 100%);
+    border: none;
+}
+
+.show-password {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.show-password:hover {
+    opacity: 0.8;
+}
+
+/* Animation for alerts */
+.alert {
+    animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Custom background */
+body {
+    background: linear-gradient(135deg, #1572E8 0%, #0F4C97 100%);
+    min-height: 100vh;
+}
+
+/* Loading animation */
+.btn.loading {
+    position: relative;
+    pointer-events: none;
+    color: transparent !important;
+}
+
+.btn.loading:after {
+    content: '';
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    top: 50%;
+    left: 50%;
+    margin-left: -0.5rem;
+    margin-top: -0.5rem;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    border-right-color: transparent;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
