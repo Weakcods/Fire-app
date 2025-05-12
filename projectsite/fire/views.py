@@ -34,6 +34,9 @@ def login_view(request):
                 if not remember_me:
                     request.session.set_expiry(0)  # Session expires when browser closes
                 
+                # Add success message for toast
+                messages.success(request, f'Welcome back, {user.username}! Login successful.')
+                
                 # Check if there's a next URL in the query parameters
                 next_url = request.GET.get('next')
                 if next_url:

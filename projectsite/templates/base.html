@@ -19,9 +19,9 @@
       });
     </script>
 
-    <!-- CSS Files -->
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <!-- CSS Files -->    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
     <link rel="stylesheet" href="{% static 'css/atlantis.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/toast.css' %}" />
 
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link rel="stylesheet" href="{% static 'css/demo.css' %}" />
@@ -186,6 +186,23 @@
         </div>
       </div>
       <!-- End Sidebar -->      <div class="main-panel">
+        <!-- Toast Container -->        <div class="toast-container">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
+                <div class="toast-header {% if message.tags %}bg-{{ message.tags }}{% endif %} text-white">
+                  <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} me-2"></i>
+                  <strong class="me-auto">{{ message.tags|title }}</strong>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                  {{ message }}
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+
         <div class="content">
           {% block dashboard_content %}{% endblock %}
         </div>
