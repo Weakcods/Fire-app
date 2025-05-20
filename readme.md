@@ -11,6 +11,15 @@ A simple app that monitors fire incidents from different cities and countries.
 
 A web-based application that monitors and visualizes fire incidents across different cities and countries. Live demo available at: [joshuawa.pythonanywhere.com](https://joshuawa.pythonanywhere.com)
 
+## 🔑 Demo Credentials
+
+To access the system, use the following credentials:
+
+```
+Username: joshua
+Password: bacay123
+```
+
 ## Features
 
 - 🗺️ Interactive Maps
