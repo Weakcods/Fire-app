@@ -303,7 +303,7 @@ def map_incidents(request):
             'latitude': float(incident['location__latitude']),
             'longitude': float(incident['location__longitude']),
             'severity_level': incident['severity_level'],
-            'date_time': incident['date_time'].strftime('%Y-%m-%d %H:%M:%S'),
+            'date_time': incident['date_time'].strftime('%Y-%m-%d %H:%M:%S') if incident['date_time'] else 'Date not available',
             'city': incident['location__city'],
             'address': incident['location__address'],
             'description': incident['description']
