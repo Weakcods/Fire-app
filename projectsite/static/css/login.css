@@ -1,6 +1,9 @@
 .card {
     border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
 }
 
 .card-header {
@@ -12,10 +15,23 @@
     padding: 0.75rem 1rem;
     font-size: 1rem;
     transition: all 0.3s ease;
+    border: 2px solid #e1e1e1;
+    background: #f8f9fa;
 }
 
 .form-control:focus {
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+    border-color: #1572E8;
+    background: #fff;
+    transform: translateY(-1px);
+}
+
+.input-group {
+    transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+    transform: translateY(-1px);
 }
 
 .input-group-text {
@@ -33,6 +49,23 @@
 .btn-primary {
     background: linear-gradient(135deg, #1572E8 0%, #0F4C97 100%);
     border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: all 0.6s;
+}
+
+.btn-primary:hover:before {
+    left: 100%;
 }
 
 .btn-primary:hover {
@@ -48,10 +81,43 @@
 .show-password {
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
 }
 
 .show-password:hover {
-    opacity: 0.8;
+    color: #1572E8 !important;
+}
+
+.show-password i {
+    transition: all 0.3s ease;
+}
+
+.show-password:active i {
+    transform: scale(0.9);
+}
+
+/* Add tooltip for password visibility */
+.show-password:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.show-password:hover:before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-5px);
 }
 
 /* Animation for alerts */
@@ -70,10 +136,24 @@
     }
 }
 
-/* Custom background */
+/* Custom background with animation */
 body {
     background: linear-gradient(135deg, #1572E8 0%, #0F4C97 100%);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
     min-height: 100vh;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 /* Loading animation */
