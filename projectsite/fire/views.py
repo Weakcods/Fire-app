@@ -1,13 +1,16 @@
-from django.shortcuts import render, redirect
-from django.views.generic.list import ListView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.db.models import Q
+from .models import Locations, Incident, FireStation, Firefighters, FireTruck, WeatherConditions
 from django.db import connection, models
 from django.http import JsonResponse
 from django.db.models.functions import ExtractMonth
-from django.db.models import Count, Q
-from fire.models import Locations, Incident, FireStation, FireTruck
+from django.db.models import Count
+from fire.models import Locations as FireLocations
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
@@ -316,3 +319,216 @@ def map_incidents(request):
     }
 
     return render(request, 'map_incidents.html', context)
+
+# Locations Views
+class LocationListView(ListView):
+    model = Locations
+    template_name = 'fire/location_list.html'
+    context_object_name = 'locations'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) |
+                Q(address__icontains=search_query) |
+                Q(city__icontains=search_query) |
+                Q(country__icontains=search_query)
+            )
+        return queryset
+
+class LocationCreateView(LoginRequiredMixin, CreateView):
+    model = Locations
+    template_name = 'fire/location_form.html'
+    fields = ['name', 'latitude', 'longitude', 'address', 'city', 'country']
+    success_url = reverse_lazy('location-list')
+
+class LocationUpdateView(LoginRequiredMixin, UpdateView):
+    model = Locations
+    template_name = 'fire/location_form.html'
+    fields = ['name', 'latitude', 'longitude', 'address', 'city', 'country']
+    success_url = reverse_lazy('location-list')
+
+class LocationDeleteView(LoginRequiredMixin, DeleteView):
+    model = Locations
+    template_name = 'fire/location_confirm_delete.html'
+    success_url = reverse_lazy('location-list')
+
+# Incident Views
+class IncidentListView(ListView):
+    model = Incident
+    template_name = 'fire/incident_list.html'
+    context_object_name = 'incidents'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(description__icontains=search_query) |
+                Q(severity_level__icontains=search_query) |
+                Q(location__name__icontains=search_query)
+            )
+        return queryset
+
+class IncidentCreateView(LoginRequiredMixin, CreateView):
+    model = Incident
+    template_name = 'fire/incident_form.html'
+    fields = ['location', 'date_time', 'severity_level', 'description']
+    success_url = reverse_lazy('incident-list')
+
+class IncidentUpdateView(LoginRequiredMixin, UpdateView):
+    model = Incident
+    template_name = 'fire/incident_form.html'
+    fields = ['location', 'date_time', 'severity_level', 'description']
+    success_url = reverse_lazy('incident-list')
+
+class IncidentDeleteView(LoginRequiredMixin, DeleteView):
+    model = Incident
+    template_name = 'fire/incident_confirm_delete.html'
+    success_url = reverse_lazy('incident-list')
+
+# FireStation Views
+class FireStationListView(ListView):
+    model = FireStation
+    template_name = 'fire/firestation_list.html'
+    context_object_name = 'firestations'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) |
+                Q(address__icontains=search_query) |
+                Q(city__icontains=search_query) |
+                Q(country__icontains=search_query)
+            )
+        return queryset
+
+class FireStationCreateView(LoginRequiredMixin, CreateView):
+    model = FireStation
+    template_name = 'fire/firestation_form.html'
+    fields = ['name', 'latitude', 'longitude', 'address', 'city', 'country']
+    success_url = reverse_lazy('firestation-list')
+
+class FireStationUpdateView(LoginRequiredMixin, UpdateView):
+    model = FireStation
+    template_name = 'fire/firestation_form.html'
+    fields = ['name', 'latitude', 'longitude', 'address', 'city', 'country']
+    success_url = reverse_lazy('firestation-list')
+
+class FireStationDeleteView(LoginRequiredMixin, DeleteView):
+    model = FireStation
+    template_name = 'fire/firestation_confirm_delete.html'
+    success_url = reverse_lazy('firestation-list')
+
+# Firefighters Views
+class FirefightersListView(ListView):
+    model = Firefighters
+    template_name = 'fire/firefighters_list.html'
+    context_object_name = 'firefighters'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) |
+                Q(rank__icontains=search_query) |
+                Q(experience_level__icontains=search_query) |
+                Q(station__icontains=search_query)
+            )
+        return queryset
+
+class FirefightersCreateView(LoginRequiredMixin, CreateView):
+    model = Firefighters
+    template_name = 'fire/firefighters_form.html'
+    fields = ['name', 'rank', 'experience_level', 'station']
+    success_url = reverse_lazy('firefighters-list')
+
+class FirefightersUpdateView(LoginRequiredMixin, UpdateView):
+    model = Firefighters
+    template_name = 'fire/firefighters_form.html'
+    fields = ['name', 'rank', 'experience_level', 'station']
+    success_url = reverse_lazy('firefighters-list')
+
+class FirefightersDeleteView(LoginRequiredMixin, DeleteView):
+    model = Firefighters
+    template_name = 'fire/firefighters_confirm_delete.html'
+    success_url = reverse_lazy('firefighters-list')
+
+# FireTruck Views
+class FireTruckListView(ListView):
+    model = FireTruck
+    template_name = 'fire/firetruck_list.html'
+    context_object_name = 'firetrucks'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(truck_number__icontains=search_query) |
+                Q(model__icontains=search_query) |
+                Q(capacity__icontains=search_query) |
+                Q(station__name__icontains=search_query)
+            )
+        return queryset
+
+class FireTruckCreateView(LoginRequiredMixin, CreateView):
+    model = FireTruck
+    template_name = 'fire/firetruck_form.html'
+    fields = ['truck_number', 'model', 'capacity', 'station']
+    success_url = reverse_lazy('firetruck-list')
+
+class FireTruckUpdateView(LoginRequiredMixin, UpdateView):
+    model = FireTruck
+    template_name = 'fire/firetruck_form.html'
+    fields = ['truck_number', 'model', 'capacity', 'station']
+    success_url = reverse_lazy('firetruck-list')
+
+class FireTruckDeleteView(LoginRequiredMixin, DeleteView):
+    model = FireTruck
+    template_name = 'fire/firetruck_confirm_delete.html'
+    success_url = reverse_lazy('firetruck-list')
+
+# WeatherConditions Views
+class WeatherConditionsListView(ListView):
+    model = WeatherConditions
+    template_name = 'fire/weatherconditions_list.html'
+    context_object_name = 'weatherconditions'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(weather_description__icontains=search_query) |
+                Q(incident__description__icontains=search_query)
+            )
+        return queryset
+
+class WeatherConditionsCreateView(LoginRequiredMixin, CreateView):
+    model = WeatherConditions
+    template_name = 'fire/weatherconditions_form.html'
+    fields = ['incident', 'temperature', 'humidity', 'wind_speed', 'weather_description']
+    success_url = reverse_lazy('weatherconditions-list')
+
+class WeatherConditionsUpdateView(LoginRequiredMixin, UpdateView):
+    model = WeatherConditions
+    template_name = 'fire/weatherconditions_form.html'
+    fields = ['incident', 'temperature', 'humidity', 'wind_speed', 'weather_description']
+    success_url = reverse_lazy('weatherconditions-list')
+
+class WeatherConditionsDeleteView(LoginRequiredMixin, DeleteView):
+    model = WeatherConditions
+    template_name = 'fire/weatherconditions_confirm_delete.html'
+    success_url = reverse_lazy('weatherconditions-list')

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Delete Weather Condition{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h4>Delete Weather Condition</h4>
+        </div>
+        <div class="card-body">
+            <p class="lead">Are you sure you want to delete this weather condition record?</p>
+            <ul>
+                <li><strong>Incident:</strong> {{ object.incident }}</li>
+                <li><strong>Temperature:</strong> {{ object.temperature }}°C</li>
+                <li><strong>Humidity:</strong> {{ object.humidity }}%</li>
+                <li><strong>Wind Speed:</strong> {{ object.wind_speed }} km/h</li>
+                <li><strong>Description:</strong> {{ object.weather_description }}</li>
+            </ul>
+            <form method="post">
+                {% csrf_token %}
+                <a href="{% url 'weatherconditions-list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 
