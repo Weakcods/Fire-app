@@ -9,7 +9,7 @@ A simple app that monitors fire incidents from different cities and countries.
 - Log in to your GitHub account.
 - Click on the "+" icon in the top-right corner of the page and select "New reposi# FireApp - Fire Incident Monitoring System
 
-A web-based application that monitors and visualizes fire incidents across different cities and countries. Live demo available at: [joshuawa.pythonanywhere.com](https://joooooshua.pythonanywhere.com)
+A web-based application that monitors and visualizes fire incidents across different cities and countries. Live demo available at: [joooooshua.pythonanywhere.com](https://joooooshua.pythonanywhere.com)
 
 ## 🔑 Demo Credentials
 
@@ -17,7 +17,7 @@ To access the system, use the following credentials:
 
 ```
 Username: joshua
-Password: bacay123
+Password: bacay
 ```
 
 ## Features
